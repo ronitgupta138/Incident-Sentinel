@@ -1,19 +1,40 @@
-# Incident-Sentinel 🛡️
-### Autonomous SRE Incident Response & Canary Deployment Safety Room built on Switch
+<div align="center">
 
-[![Switch](https://img.shields.io/badge/Orchestrator-Switch_Rooms-0891b2?style=flat&logo=switch)](https://github.com/sandbox-quantum/switch)
-[![Hackathon](https://img.shields.io/badge/WeMakeDevs-Flip_The_Switch-FF895E?style=flat)](https://www.wemakedevs.org/hackathons/switch)
-[![Track](https://img.shields.io/badge/Track_01-Best_Business_Workflow-10b981?style=flat)](#track-01-best-business-workflow)
-[![Architecture](https://img.shields.io/badge/Agents-Multi--Agent_SRE_Swarm-blueviolet?style=flat)](#system-architecture)
-[![License](https://img.shields.io/badge/license-MIT-0891b2?style=flat)](LICENSE)
+```text
+███████╗███████╗███╗   ██╗████████╗██╗███╗   ██╗███████╗██╗     
+██╔════╝██╔════╝████╗  ██║╚══██╔══╝██║████╗  ██║██╔════╝██║     
+███████╗█████╗  ██╔██╗ ██║   ██║   ██║██╔██╗ ██║█████╗  ██║     
+╚════██║██╔══╝  ██║╚██╗██║   ██║   ██║██║╚██╗██║██╔══╝  ██║     
+███████║███████╗██║ ╚████║   ██║   ██║██║ ╚████║███████╗███████╗
+╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝
+```
 
-> Built for the **WeMakeDevs × DevTools Academy × Switch Hackathon (Track 01: Best Business Workflow)**.  
-> Authored by **[Ronit Gupta](https://github.com/ronitgupta138)**.
+### **Incident-Sentinel — Autonomous SRE Incident Response & Canary Deployment Safety Room on Switch**
+*Autonomous Telemetry Ingestion, Multi-Agent Outage Triage, Blast Radius Verification & Human-in-the-Loop Rollback Dispatch*
+
+[![GitHub Stars](https://img.shields.io/github/stars/ronitgupta138/incident-sentinel?style=flat-square&logo=github&color=0891b2)](https://github.com/ronitgupta138/incident-sentinel/stargazers)
+[![Orchestrator: Switch](https://img.shields.io/badge/Orchestrator-Switch_Rooms-0891b2?style=flat-square&logo=switch&logoColor=white)](https://github.com/sandbox-quantum/switch)
+[![Hackathon: WeMakeDevs](https://img.shields.io/badge/WeMakeDevs-Flip_The_Switch-FF895E?style=flat-square)](https://www.wemakedevs.org/hackathons/switch)
+[![Track 01](https://img.shields.io/badge/Track_01-Best_Business_Workflow-10b981?style=flat-square)](#-the-problem-the-100k-production-outage)
+[![Multi-Agent](https://img.shields.io/badge/Architecture-Multi--Agent_SRE_Swarm-0891b2?style=flat-square)](#-system-architecture)
+[![FastMCP](https://img.shields.io/badge/FastMCP-3.3-0891b2?style=flat-square&logo=python&logoColor=white)](https://modelcontextprotocol.io/)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-0891b2?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/Tests-Passed_100%25-10b981?style=flat-square)](https://github.com/ronitgupta138/incident-sentinel/actions)
+[![CI Pipeline](https://img.shields.io/badge/CI-GitHub_Actions-0891b2?style=flat-square&logo=githubactions&logoColor=white)](https://github.com/ronitgupta138/incident-sentinel/actions/workflows/ci.yml)
+[![Hits](https://hits.sh/github.com/ronitgupta138/incident-sentinel.svg?style=flat-square&label=views&color=0891b2&labelColor=0a0b0e)](https://hits.sh/github.com/ronitgupta138/incident-sentinel/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-gray?style=flat-square)](LICENSE)
+
+</div>
+
+> 🏆 **Official Submission**: Built for the **WeMakeDevs × DevTools Academy × Switch Hackathon (Track 01: Best Business Workflow)**.  
+> 👤 **Sole Author**: **[Ronit Gupta](https://github.com/ronitgupta138)** ([LinkedIn](https://www.linkedin.com/in/ronitgupta138/))  
+> 📖 **Technical Architecture Deep-Dive**: Read the complete engineering retrospective in **[`BLOG_POST.md`](BLOG_POST.md)**.
 
 ---
 
 ## ⚡ The Problem: The $100k+ Production Outage
 When a breaking deployment hits production, every minute of downtime costs thousands of dollars. Engineers typically spend **30 to 45 minutes** in high-stress war rooms:
+
 1. Digging through disparate Datadog / New Relic error logs.
 2. Manually correlating error timestamps against recent git commit SHAs.
 3. Arguing over which deployment broke the service.
@@ -121,7 +142,7 @@ cd incident-sentinel
 python3 test_incident_flow.py
 ```
 **Output:**
-```
+```text
 ✅ End-to-end incident triage and recovery test PASSED!
 - Detected degraded cart-service (48.7% error rate).
 - Correlated with commit v2.14.0.
@@ -129,7 +150,13 @@ python3 test_incident_flow.py
 - Verified 100% recovery (0.0% errors, HTTP 200).
 ```
 
-### Option B: Docker Compose (Full Stack)
+### Option B: Interactive War Room Simulation
+```bash
+python3 demo_simulation.py
+```
+*Renders a real-time, terminal war room simulation with status spinners, error rate metrics tables, approval gates, and synthetic probes.*
+
+### Option C: Docker Compose (Full Stack)
 ```bash
 docker compose up -d
 make trigger-incident   # Induces live 500 error spike
