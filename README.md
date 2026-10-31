@@ -12,16 +12,16 @@
 ### **Incident-Sentinel — Autonomous SRE Incident Response & Canary Deployment Safety Room on Switch**
 *Autonomous Telemetry Ingestion, Multi-Agent Outage Triage, Blast Radius Verification & Human-in-the-Loop Rollback Dispatch*
 
-[![GitHub Stars](https://img.shields.io/github/stars/ronitgupta138/incident-sentinel?style=flat-square&logo=github&color=0891b2)](https://github.com/ronitgupta138/incident-sentinel/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/ronitgupta138/incident-sentinel?style=flat-square&logo=github&color=0891b2)](https://github.com/ronitgupta138/Incident-Sentinel/stargazers)
 [![Orchestrator: Switch](https://img.shields.io/badge/Orchestrator-Switch_Rooms-0891b2?style=flat-square&logo=switch&logoColor=white)](https://github.com/sandbox-quantum/switch)
 [![Hackathon: WeMakeDevs](https://img.shields.io/badge/WeMakeDevs-Flip_The_Switch-FF895E?style=flat-square)](https://www.wemakedevs.org/hackathons/switch)
 [![Track 01](https://img.shields.io/badge/Track_01-Best_Business_Workflow-10b981?style=flat-square)](#-the-problem-the-100k-production-outage)
 [![Multi-Agent](https://img.shields.io/badge/Architecture-Multi--Agent_SRE_Swarm-0891b2?style=flat-square)](#-system-architecture)
 [![FastMCP](https://img.shields.io/badge/FastMCP-3.3-0891b2?style=flat-square&logo=python&logoColor=white)](https://modelcontextprotocol.io/)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-0891b2?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-Passed_100%25-10b981?style=flat-square)](https://github.com/ronitgupta138/incident-sentinel/actions)
-[![CI Pipeline](https://img.shields.io/badge/CI-GitHub_Actions-0891b2?style=flat-square&logo=githubactions&logoColor=white)](https://github.com/ronitgupta138/incident-sentinel/actions/workflows/ci.yml)
-[![Hits](https://hits.sh/github.com/ronitgupta138/incident-sentinel.svg?style=flat-square&label=views&color=0891b2&labelColor=0a0b0e)](https://hits.sh/github.com/ronitgupta138/incident-sentinel/)
+[![Tests](https://img.shields.io/badge/Tests-Passed_100%25-10b981?style=flat-square)](https://github.com/ronitgupta138/Incident-Sentinel/actions)
+[![CI Pipeline](https://img.shields.io/badge/CI-GitHub_Actions-0891b2?style=flat-square&logo=githubactions&logoColor=white)](https://github.com/ronitgupta138/Incident-Sentinel/actions/workflows/ci.yml)
+[![Hits](https://hits.sh/github.com/ronitgupta138/Incident-Sentinel.svg?style=flat-square&label=views&color=0891b2&labelColor=0a0b0e)](https://hits.sh/github.com/ronitgupta138/Incident-Sentinel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-gray?style=flat-square)](LICENSE)
 
 </div>
@@ -135,7 +135,7 @@ You can run and test the complete incident response pipeline locally with zero e
 ### Option A: Local Python Test (Instant)
 ```bash
 # 1. Clone repository
-git clone https://github.com/ronitgupta138/incident-sentinel.git
+git clone https://github.com/ronitgupta138/Incident-Sentinel.git
 cd incident-sentinel
 
 # 2. Run automated end-to-end incident recovery test
@@ -180,5 +180,5 @@ To install Incident-Sentinel directly into your Switch workspace:
 - **Hackathon:** [WeMakeDevs Flip the Switch](https://www.wemakedevs.org/hackathons/switch)
 - **Track:** **Track 01 — Best Business Workflow** ($2,000 Cash)
 - **Code with Wispr:** Built with voice dictation & prompt engineering via Wispr Flow.
-- **Repository:** `https://github.com/ronitgupta138/incident-sentinel`
+- **Repository:** `https://github.com/ronitgupta138/Incident-Sentinel`
 - **Sole Author:** Ronit Gupta ([GitHub](https://github.com/ronitgupta138) · [LinkedIn](https://www.linkedin.com/in/ronitgupta138/))

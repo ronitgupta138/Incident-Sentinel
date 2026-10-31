@@ -19,7 +19,7 @@ By the time the rollback command is typed and executed, **40 minutes have passed
 
 When we saw the **[Flip the Switch Hackathon](https://www.wemakedevs.org/hackathons/switch)**, we realized Switch provides the exact missing link needed to solve this problem permanently: **turning solo AI coding agents into collaborative teammates directly inside your chat channels.**
 
-We built **[Incident-Sentinel](https://github.com/ronitgupta138/incident-sentinel)** — an autonomous Site Reliability Engineering room where AI agents and human on-call engineers triage, diagnose, approve, and resolve production incidents in **under 3 minutes**.
+We built **[Incident-Sentinel](https://github.com/ronitgupta138/Incident-Sentinel)** — an autonomous Site Reliability Engineering room where AI agents and human on-call engineers triage, diagnose, approve, and resolve production incidents in **under 3 minutes**.
 
 ---
 
@@ -161,7 +161,7 @@ We designed Incident-Sentinel to be 100% reproducible out-of-the-box. We built a
 
 ```bash
 # Clone the repository
-git clone https://github.com/ronitgupta138/incident-sentinel.git
+git clone https://github.com/ronitgupta138/Incident-Sentinel.git
 cd incident-sentinel
 
 # Run the automated end-to-end incident flow test
@@ -186,7 +186,7 @@ Output:
 3. **Human-in-the-loop is non-negotiable for enterprise SRE:** Autonomous diagnosis + human approval + autonomous execution is the gold standard for AI in production systems.
 
 Check out the full open-source code and template on GitHub:  
-👉 **[github.com/ronitgupta138/incident-sentinel](https://github.com/ronitgupta138/incident-sentinel)**
+👉 **[github.com/ronitgupta138/Incident-Sentinel](https://github.com/ronitgupta138/Incident-Sentinel)**
 
 ---
 *Built with passion by [Ronit Gupta](https://github.com/ronitgupta138) for the Flip the Switch Hackathon.*
