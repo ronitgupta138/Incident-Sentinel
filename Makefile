@@ -22,4 +22,4 @@ test:
 	python3 test_incident_flow.py
 
 demo:
-	python3 test_incident_flow.py
+	python3 demo_simulation.py
