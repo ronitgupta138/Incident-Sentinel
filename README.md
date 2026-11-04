@@ -12,7 +12,7 @@
 ### **Incident-Sentinel — Autonomous SRE Incident Response & Canary Deployment Safety Room on Switch**
 *Autonomous Telemetry Ingestion, Multi-Agent Outage Triage, Blast Radius Verification & Human-in-the-Loop Rollback Dispatch*
 
-[![GitHub Stars](https://img.shields.io/github/stars/ronitgupta138/incident-sentinel?style=flat-square&logo=github&color=0891b2)](https://github.com/ronitgupta138/Incident-Sentinel/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/ronitgupta138/Incident-Sentinel?style=flat-square&logo=github&color=0891b2)](https://github.com/ronitgupta138/Incident-Sentinel/stargazers)
 [![Orchestrator: Switch](https://img.shields.io/badge/Orchestrator-Switch_Rooms-0891b2?style=flat-square&logo=switch&logoColor=white)](https://github.com/sandbox-quantum/switch)
 [![Hackathon: WeMakeDevs](https://img.shields.io/badge/WeMakeDevs-Flip_The_Switch-FF895E?style=flat-square)](https://www.wemakedevs.org/hackathons/switch)
 [![Track 01](https://img.shields.io/badge/Track_01-Best_Business_Workflow-10b981?style=flat-square)](#-the-problem-the-100k-production-outage)
