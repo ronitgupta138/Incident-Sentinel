@@ -82,6 +82,11 @@ When a breaking deployment hits production, every minute of downtime costs thous
 <div align="center">
   <img src="https://github.com/ronitgupta138/Incident-Sentinel/releases/download/v1.0.0/demo_preview.gif" alt="Incident-Sentinel Demo Simulation" width="100%">
   <p><em>4-Phase Autonomous SRE Incident Triage, Human Approval Gate & Deployment Rollback on Switch</em></p>
+  <p>
+    <a href="https://youtu.be/yiaDgjXUlhA" target="_blank">
+      <img src="https://img.shields.io/badge/▶_Watch_Demo_Video-YouTube_(1080p_60fps)-red?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch Demo on YouTube">
+    </a>
+  </p>
 </div>
 
 ---
