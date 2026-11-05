@@ -6,26 +6,29 @@
 <title>Incident-Sentinel — Live SRE War Room on Switch</title>
 <style>
   :root {
-    --bg-main: #1a1d21;
-    --bg-sidebar: #121417;
-    --bg-chat: #222529;
-    --bg-card: #2c3136;
-    --border-color: #383f45;
+    --bg-main: #0b0f19;
+    --bg-sidebar: #060911;
+    --bg-chat: #0b0f19;
+    --bg-card: #131c2e;
+    --border-color: #233148;
     --text-primary: #ffffff;
-    --text-secondary: #9ea2a8;
-    --text-muted: #6b7280;
+    --text-secondary: #e2e8f0;
+    --text-muted: #94a3b8;
     --accent-blue: #38bdf8;
-    --accent-red: #ef4444;
-    --accent-green: #22c55e;
-    --accent-yellow: #f59e0b;
-    --accent-purple: #a855f7;
-    --switch-orange: #f97316;
+    --accent-red: #f87171;
+    --accent-green: #4ade80;
+    --accent-yellow: #fbbf24;
+    --accent-purple: #c084fc;
+    --switch-orange: #fb923c;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: #0f1115;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    background: #04060a;
     color: var(--text-primary);
     height: 100vh;
     display: flex;
@@ -39,7 +42,8 @@
     height: 980px;
     background: var(--bg-main);
     border-radius: 12px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255,255,255,0.08);
+    border: 1px solid #26354a;
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -231,12 +235,11 @@
     display: flex;
     gap: 14px;
     opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
   }
   .message.visible {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 
   .msg-avatar {
@@ -258,38 +261,44 @@
     gap: 8px;
     margin-bottom: 4px;
   }
-  .msg-author { font-size: 14px; font-weight: 700; color: var(--text-primary); }
-  .msg-time { font-size: 11px; color: var(--text-muted); }
+  .msg-author { font-size: 14px; font-weight: 700; color: #ffffff; }
+  .msg-time { font-size: 11px; color: #94a3b8; }
 
   .msg-text {
-    font-size: 13.5px;
+    font-size: 14px;
     line-height: 1.5;
-    color: #e5e7eb;
+    color: #f1f5f9;
   }
 
   /* Cards inside chat */
   .incident-card {
-    background: var(--bg-card);
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin-top: 8px;
-    border-left: 4px solid var(--border-color);
+    background: #111b2f;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 10px;
+    border: 1px solid #1e293b;
+    border-left: 6px solid #38bdf8;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }
   .incident-card.alert {
-    border-left-color: var(--accent-red);
-    background: rgba(239, 68, 68, 0.08);
+    border-color: #451a1a;
+    border-left-color: #ef4444;
+    background: #180d12;
   }
   .incident-card.diagnosis {
-    border-left-color: var(--accent-blue);
-    background: rgba(56, 189, 248, 0.06);
+    border-color: #164e63;
+    border-left-color: #06b6d4;
+    background: #091a29;
   }
   .incident-card.approval {
-    border-left-color: var(--accent-yellow);
-    background: rgba(245, 158, 11, 0.08);
+    border-color: #55330e;
+    border-left-color: #f59e0b;
+    background: #1c150c;
   }
   .incident-card.success {
-    border-left-color: var(--accent-green);
-    background: rgba(34, 197, 94, 0.08);
+    border-color: #064e3b;
+    border-left-color: #10b981;
+    background: #081a14;
   }
 
   .card-title {
@@ -701,12 +710,20 @@
   </div>
 </div>
 
+<!-- Virtual Cursor for authentic screen recording -->
+<div id="virtualCursor" style="position:absolute; top:800px; left:600px; width:24px; height:24px; pointer-events:none; z-index:9999; transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1); opacity:0;">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M5.5 3.2L18.8 12.3L12.5 13.9L16.2 20.7L13.8 22L10.1 15.2L5.5 18.8V3.2Z" fill="white" stroke="black" stroke-width="1.5"/>
+  </svg>
+</div>
+
 <script>
   const msgContainer = document.getElementById('msgContainer');
   const typingBox = document.getElementById('typingBox');
   const typingText = document.getElementById('typingText');
   const approveBtn = document.getElementById('approveBtn');
   const inputDisplay = document.getElementById('inputDisplay');
+  const virtualCursor = document.getElementById('virtualCursor');
 
   function showTyping(text) {
     typingText.textContent = text;
@@ -716,16 +733,33 @@
     typingBox.style.visibility = 'hidden';
   }
 
+  function smoothScrollTo(y) {
+    msgContainer.scrollTo({ top: y, behavior: 'smooth' });
+  }
+
   function revealMsg(id) {
     const el = document.getElementById(id);
     if (el) {
       el.classList.add('visible');
-      msgContainer.scrollTop = msgContainer.scrollHeight;
     }
   }
 
+  function typeText(targetText, element, speed, callback) {
+    let i = 0;
+    element.textContent = '';
+    const interval = setInterval(() => {
+      if (i < targetText.length) {
+        element.textContent += targetText.charAt(i);
+        i++;
+      } else {
+        clearInterval(interval);
+        if (callback) callback();
+      }
+    }, speed);
+  }
+
   function startSimulation() {
-    // Hide all
+    // Reset state
     for (let i = 0; i <= 6; i++) {
       const el = document.getElementById(`msg${i}`);
       if (el) el.classList.remove('visible');
@@ -734,63 +768,91 @@
     approveBtn.innerHTML = '<span>✓</span> APPROVE ROLLBACK';
     hideTyping();
     inputDisplay.textContent = 'Message #incident-war-room...';
+    msgContainer.scrollTop = 0;
+    virtualCursor.style.opacity = '0';
+    virtualCursor.style.top = '800px';
+    virtualCursor.style.left = '600px';
 
-    // Step 0: Deploy message
+    // 0s: GitHub Deploy bot visible
     setTimeout(() => {
       revealMsg('msg0');
-    }, 400);
+    }, 600);
 
-    // Step 1: PagerDuty Alert
+    // 5s: 🚨 PagerDuty Alert arrives
     setTimeout(() => {
       revealMsg('msg1');
-    }, 1800);
+      smoothScrollTo(0);
+    }, 5000);
 
-    // Step 2: Ronit asks
+    // 9s - 15s: Ronit types prompt in input box
     setTimeout(() => {
-      revealMsg('msg2');
-    }, 3800);
+      typeText("@sentinel-triager checkout is failing since 09:40. Can you investigate root cause?", inputDisplay, 45, () => {
+        // 15s: Hit enter and send
+        setTimeout(() => {
+          revealMsg('msg2');
+          inputDisplay.textContent = 'Message #incident-war-room...';
+        }, 600);
+      });
+    }, 9000);
 
-    // Step 3: Triager investigates
+    // 16s - 22s: Triager typing and query telemetry
     setTimeout(() => {
-      showTyping('@sentinel-triager is querying FastMCP telemetry & git commit SHAs...');
-    }, 4500);
+      showTyping('@sentinel-triager is querying FastMCP observability metrics & commit correlation...');
+    }, 16500);
 
+    // 22s: Triager diagnosis card appears
     setTimeout(() => {
       hideTyping();
       revealMsg('msg3');
-    }, 7000);
+      smoothScrollTo(140);
+    }, 22000);
 
-    // Step 4: Remediator prepares approval card
+    // 28s - 34s: Remediator analyzes diff
     setTimeout(() => {
-      showTyping('@sentinel-remediator is checking git diff and database schema compatibility...');
-    }, 7800);
+      showTyping('@sentinel-remediator is checking git diff and database schema backwards-compatibility...');
+    }, 28000);
 
+    // 34s: Remediator Human Approval Card appears
     setTimeout(() => {
       hideTyping();
       revealMsg('msg4');
-    }, 10500);
+      smoothScrollTo(380);
+    }, 34000);
 
-    // Step 5: Auto-approve click
+    // 38s: Virtual cursor appears and moves to Approve button
+    setTimeout(() => {
+      const rect = approveBtn.getBoundingClientRect();
+      virtualCursor.style.opacity = '1';
+      virtualCursor.style.left = (rect.left + 50) + 'px';
+      virtualCursor.style.top = (rect.top + 15) + 'px';
+    }, 38500);
+
+    // 41s: Click approve button
     setTimeout(() => {
       approveBtn.classList.add('clicked');
       approveBtn.innerHTML = '<span>✓</span> APPROVED by Ronit Gupta (09:42:48 UTC)';
-      inputDisplay.textContent = 'APPROVE';
-    }, 13000);
+      virtualCursor.style.transform = 'scale(0.85)';
+      setTimeout(() => virtualCursor.style.transform = 'none', 150);
+    }, 41500);
 
+    // 43s: Move cursor away and reveal approval message
     setTimeout(() => {
+      virtualCursor.style.opacity = '0';
       revealMsg('msg5');
-      inputDisplay.textContent = 'Message #incident-war-room...';
-    }, 14200);
+      smoothScrollTo(520);
+    }, 43500);
 
-    // Step 6: Operator rolls back and probes
+    // 45s: Operator begins rollback
     setTimeout(() => {
-      showTyping('@sentinel-operator is executing zero-downtime rollback & probing endpoints...');
-    }, 14800);
+      showTyping('@sentinel-operator is executing deployment rollback to v2.13.2 across cluster...');
+    }, 45500);
 
+    // 51s: Probes & Recovery summary card appears
     setTimeout(() => {
       hideTyping();
       revealMsg('msg6');
-    }, 17500);
+      smoothScrollTo(950);
+    }, 51000);
   }
 
   function userClicksApprove() {
@@ -804,7 +866,6 @@
     }, 2000);
   }
 
-  // Start on load
   window.addEventListener('load', () => {
     startSimulation();
   });
