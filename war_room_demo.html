@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Incident-Sentinel — Live SRE War Room on Switch</title>
+<style>
+  :root {
+    --bg-main: #1a1d21;
+    --bg-sidebar: #121417;
+    --bg-chat: #222529;
+    --bg-card: #2c3136;
+    --border-color: #383f45;
+    --text-primary: #ffffff;
+    --text-secondary: #9ea2a8;
+    --text-muted: #6b7280;
+    --accent-blue: #38bdf8;
+    --accent-red: #ef4444;
+    --accent-green: #22c55e;
+    --accent-yellow: #f59e0b;
+    --accent-purple: #a855f7;
+    --switch-orange: #f97316;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #0f1115;
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .window-frame {
+    width: 1400px;
+    height: 860px;
+    background: var(--bg-main);
+    border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* macOS Window Top Bar */
+  .title-bar {
+    height: 42px;
+    background: #14171a;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    user-select: none;
+  }
+  .window-dots {
+    display: flex;
+    gap: 8px;
+    margin-right: 20px;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f56; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green { background: #27c93f; }
+  .title-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Main Workspace Layout */
+  .workspace {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 280px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+  }
+  .org-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .org-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #0284c7, #6366f1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .org-info h3 { font-size: 14px; font-weight: 700; }
+  .org-info p { font-size: 11px; color: var(--accent-green); display: flex; align-items: center; gap: 4px; }
+  .online-indicator { width: 6px; height: 6px; background: var(--accent-green); border-radius: 50%; }
+
+  .channel-section {
+    padding: 16px 12px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    padding-left: 8px;
+  }
+  .channel-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-bottom: 2px;
+  }
+  .channel-item.active {
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .unread-pill {
+    margin-left: auto;
+    background: var(--accent-red);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 10px;
+  }
+
+  .agent-member {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .avatar-sm {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .badge-bot {
+    font-size: 9px;
+    background: #374151;
+    color: #93c5fd;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 700;
+    margin-left: auto;
+  }
+
+  /* Chat Pane */
+  .chat-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-main);
+  }
+  .chat-header {
+    height: 56px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background: #14171a;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-title { font-size: 15px; font-weight: 700; }
+  .header-desc { font-size: 12px; color: var(--text-secondary); border-left: 1px solid var(--border-color); padding-left: 12px; }
+  .switch-badge {
+    background: rgba(249, 115, 22, 0.15);
+    border: 1px solid rgba(249, 115, 22, 0.4);
+    color: var(--switch-orange);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Messages Container */
+  .messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    scroll-behavior: smooth;
+  }
+
+  .message {
+    display: flex;
+    gap: 14px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .message.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .msg-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .msg-content {
+    flex: 1;
+  }
+  .msg-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .msg-author { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+  .msg-time { font-size: 11px; color: var(--text-muted); }
+
+  .msg-text {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #e5e7eb;
+  }
+
+  /* Cards inside chat */
+  .incident-card {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-top: 8px;
+    border-left: 4px solid var(--border-color);
+  }
+  .incident-card.alert {
+    border-left-color: var(--accent-red);
+    background: rgba(239, 68, 68, 0.08);
+  }
+  .incident-card.diagnosis {
+    border-left-color: var(--accent-blue);
+    background: rgba(56, 189, 248, 0.06);
+  }
+  .incident-card.approval {
+    border-left-color: var(--accent-yellow);
+    background: rgba(245, 158, 11, 0.08);
+  }
+  .incident-card.success {
+    border-left-color: var(--accent-green);
+    background: rgba(34, 197, 94, 0.08);
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 16px;
+    font-size: 12px;
+  }
+  .grid-label { color: var(--text-secondary); }
+  .grid-val { font-weight: 600; color: var(--text-primary); font-family: monospace; }
+  .grid-val.red { color: #f87171; }
+  .grid-val.green { color: #4ade80; }
+
+  /* Approval Button */
+  .action-row {
+    margin-top: 14px;
+    display: flex;
+    gap: 12px;
+  }
+  .btn-approve {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+    transition: all 0.2s ease;
+  }
+  .btn-approve.clicked {
+    background: #059669;
+    pointer-events: none;
+    box-shadow: 0 0 0 2px #34d399;
+  }
+
+  /* Synthetic Probe Table */
+  .probe-table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .probe-table th {
+    text-align: left;
+    color: var(--text-muted);
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .probe-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* Typing Indicator */
+  .typing-box {
+    padding: 0 24px 12px;
+    font-size: 12px;
+    color: var(--accent-blue);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 24px;
+  }
+  .typing-dots {
+    display: inline-flex;
+    gap: 4px;
+  }
+  .typing-dots span {
+    width: 4px;
+    height: 4px;
+    background: var(--accent-blue);
+    border-radius: 50%;
+    animation: blink 1.4s infinite both;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+  /* Input bar placeholder */
+  .chat-input-bar {
+    padding: 12px 24px 20px;
+    background: var(--bg-main);
+  }
+  .input-inner {
+    background: #14171a;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Replay Overlay */
+  .controls-bar {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+  }
+  .btn-replay {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-replay:hover { background: rgba(255,255,255,0.2); }
+</style>
+</head>
+<body>
+
+<div class="window-frame">
+  <!-- Controls -->
+  <div class="controls-bar">
+    <button class="btn-replay" onclick="startSimulation()">↺ Restart Simulation</button>
+  </div>
+
+  <!-- Window Header -->
+  <div class="title-bar">
+    <div class="window-dots">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <div class="title-text">
+      <span>ACME Platform War Room</span> &nbsp;—&nbsp; <span>Mattermost / Slack Bridge</span> &nbsp;—&nbsp; <span style="color:#38bdf8;">Switch Protocol v2.4</span>
+    </div>
+  </div>
+
+  <!-- Workspace -->
+  <div class="workspace">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="org-header">
+        <div class="org-avatar">AP</div>
+        <div class="org-info">
+          <h3>ACME Cloud Infra</h3>
+          <p><span class="online-indicator"></span> 4 Agents Active</p>
+        </div>
+      </div>
+
+      <div class="channel-section">
+        <div class="section-label">Incident Rooms</div>
+        <div class="channel-item active">
+          <span>🚨</span> #incident-war-room
+          <span class="unread-pill" id="unreadPill">1</span>
+        </div>
+        <div class="channel-item">
+          <span>#</span> deployments
+        </div>
+        <div class="channel-item">
+          <span>#</span> telemetry-alerts
+        </div>
+
+        <div class="section-label" style="margin-top:20px;">Room Members</div>
+        <div class="agent-member">
+          <div class="avatar-sm" style="background:#2563eb; color:white;">RG</div>
+          <span>Ronit Gupta (SRE)</span>
+        </div>
+        <div class="agent-member">
+          <div class="avatar-sm" style="background:#0891b2; color:white;">🔍</div>
+          <span>@sentinel-triager</span>
+          <span class="badge-bot">BOT</span>
+        </div>
+        <div class="agent-member">
+          <div class="avatar-sm" style="background:#d97706; color:white;">🛡️</div>
+          <span>@sentinel-remediator</span>
+          <span class="badge-bot">BOT</span>
+        </div>
+        <div class="agent-member">
+          <div class="avatar-sm" style="background:#059669; color:white;">🚀</div>
+          <span>@sentinel-operator</span>
+          <span class="badge-bot">BOT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="chat-pane">
+      <div class="chat-header">
+        <div class="header-left">
+          <div class="header-title">#incident-war-room</div>
+          <div class="header-desc">Autonomous SRE Incident Response & Canary Deployment Safety</div>
+        </div>
+        <div class="switch-badge">
+          <span>⚡</span> Switch Agent Room Active
+        </div>
+      </div>
+
+      <!-- Messages Stream -->
+      <div class="messages-container" id="msgContainer">
+        
+        <!-- Msg 0: Pre-incident deployment notification -->
+        <div class="message" id="msg0">
+          <div class="msg-avatar" style="background:#374151;">🤖</div>
+          <div class="msg-content">
+            <div class="msg-meta">
+              <span class="msg-author">GitHub Actions Deploy Bot</span>
+              <span class="badge-bot">APP</span>
+              <span class="msg-time">09:40:02 UTC</span>
+            </div>
+            <div class="msg-text">
+              🚀 Deployment <code style="color:#60a5fa;">v2.14.0 (commit 8f3a91b)</code> promoted to production APAC (<code style="color:#60a5fa;">cart-service</code>).
+            </div>
+          </div>
+        </div>
+
+        <!-- Msg 1: PagerDuty Alert Trigger -->
+        <div class="message" id="msg1">
+          <div class="msg-avatar" style="background:#dc2626;">🚨</div>
+          <div class="msg-content">
+            <div class="msg-meta">
+              <span class="msg-author" style="color:#f87171;">PagerDuty Alert Ingestion</span>
+              <span class="badge-bot" style="background:#991b1b; color:white;">P1 ALERT</span>
+              <span class="msg-time">09:42:10 UTC</span>
+            </div>
+            <div class="incident-card alert">
+              <div class="card-title" style="color:#f87171;">
+                <span>🔥</span> HIGH ERROR RATE DETECTED — P1 OUTAGE
+              </div>
+              <div class="card-grid">
+                <div><span class="grid-label">Service:</span> <span class="grid-val">cart-service (Production APAC)</span></div>
+                <div><span class="grid-label">Target Endpoint:</span> <span class="grid-val">/api/v1/checkout</span></div>
+                <div><span class="grid-label">HTTP 500 Spike:</span> <span class="grid-val red">48.7% (Threshold: 45.0%)</span></div>
+                <div><span class="grid-label">Triggered At:</span> <span class="grid-val">09:42:10 UTC</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Msg 2: Human On-Call Query -->
+        <div class="message" id="msg2">
+          <div class="msg-avatar" style="background:#2563eb; color:white; font-weight:700;">RG</div>
+          <div class="msg-content">
+            <div class="msg-meta">
+              <span class="msg-author">Ronit Gupta (Lead SRE)</span>
+              <span class="msg-time">09:42:15 UTC</span>
+            </div>
+            <div class="msg-text">
+              <span style="color:#38bdf8; font-weight:600;">@sentinel-triager</span> checkout is failing since 09:40. Can you investigate root cause immediately?
+            </div>
+          </div>
+        </div>
+
+        <!-- Msg 3: Triager Diagnosis -->
+        <div class="message" id="msg3">
+          <div class="msg-avatar" style="background:#0891b2; color:white;">🔍</div>
+          <div class="msg-content">
+            <div class="msg-meta">
+              <span class="msg-author" style="color:#38bdf8;">@sentinel-triager</span>
+              <span class="badge-bot">FAST-MCP</span>
+              <span class="msg-time">09:42:25 UTC</span>
+            </div>
+            <div class="msg-text">
+              Queried FastMCP observability telemetry. Microservice <code style="color:#f87171;">cart-service</code> has degraded severely following deploy <code style="color:#f87171;">v2.14.0</code>.
+            </div>
+            <div class="incident-card diagnosis">
+              <div class="card-title" style="color:#38bdf8;">
+                <span>📊</span> Root Cause & Telemetry Diagnosis
+              </div>
+              <div class="card-grid">
+                <div><span class="grid-label">HTTP 500 Errors:</span> <span class="grid-val red">48.7% (1,420 errors/5m)</span></div>
+                <div><span class="grid-label">Normal Baseline:</span> <span class="grid-val green">&lt; 0.01%</span></div>
+                <div><span class="grid-label">p99 Tail Latency:</span> <span class="grid-val red">3,840.5 ms</span></div>
+                <div><span class="grid-label">Baseline Latency:</span> <span class="grid-val green">28.0 ms</span></div>
+                <div><span class="grid-label">Culprit Commit:</span> <span class="grid-val red">v2.14.0 (SHA: 8f3a91b)</span></div>
+                <div><span class="grid-label">Previous Stable:</span> <span class="grid-val green">v2.13.2 (SHA: 4e1c07a)</span></div>
+              </div>
+              <div style="margin-top:8px; font-size:11.5px; color:#fca5a5; font-family:monospace;">
+                Stack Trace: NullPointerException in CartSession.getDiscount() at /api/v1/checkout:84
+              </div>
+            </div>
+            <div class="msg-text" style="margin-top:6px; font-size:12px; color:#94a3b8;">
+              ➡️ Handing context to <span style="color:#f59e0b; font-weight:600;">@sentinel-remediator</span> to evaluate rollback safety.
+            </div>
+          </div>
+        </div>
+
+        <!-- Msg 4: Remediator Human Approval Card -->
+        <div class="message" id="msg4">
+          <div class="msg-avatar" style="background:#d97706; color:white;">🛡️</div>
+          <div class="msg-content">
+            <div class="msg-meta">
+              <span class="msg-author" style="color:#fbbf24;">@sentinel-remediator</span>
+              <span class="badge-bot">SAFETY GATE</span>
+              <span class="msg-time">09:42:38 UTC</span>
+            </div>
+            <div class="incident-card approval">
+              <div class="card-title" style="color:#fbbf24;">
+                <span>⚠️</span> HUMAN-IN-THE-LOOP APPROVAL REQUIRED FOR ROLLBACK
+              </div>
+              <div class="card-grid">
+                <div><span class="grid-label">Proposed Action:</span> <span class="grid-val">Rollback v2.14.0 ➔ v2.13.2</span></div>
+                <div><span class="grid-label">Impacted Pods:</span> <span class="grid-val">cart-service-prod-01..12</span></div>
+                <div><span class="grid-label">DB Migration Schema:</span> <span class="grid-val green">PASS (Backwards Compatible)</span></div>
+                <div><span class="grid-label">Estimated Downtime:</span> <span class="grid-val green">&lt; 30 seconds</span></div>
+              </div>
+              <p style="margin-top:10px; font-size:12px; color:#e2e8f0;">
+                🔒 <strong>Safety Invariant:</strong> Infrastructure mutations strictly require explicit sign-off from on-call engineer.
+              </p>
+              <div class="action-row">
+                <button class="btn-approve" id="approveBtn" onclick="userClicksApprove()">
+                  <span>✓</span> APPROVE ROLLBACK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Msg 5: Human Approves -->
+        <div class="message" id="msg5">
+          <div class="msg-avatar" style="background:#2563eb; color:white; font-weight:700;">RG</div>
+          <div class="msg-content">
+            <div class="msg-meta">
+              <span class="msg-author">Ronit Gupta (Lead SRE)</span>
+              <span class="msg-time">09:42:48 UTC</span>
+            </div>
+            <div class="msg-text">
+              <span style="background:rgba(34, 197, 94, 0.2); color:#4ade80; padding:2px 8px; border-radius:4px; font-weight:700;">
+                APPROVE
+              </span> Rollback authorized. Proceed immediately.
+            </div>
+          </div>
+        </div>
+
+        <!-- Msg 6: Operator Rollback Execution & Verification -->
+        <div class="message" id="msg6">
+          <div class="msg-avatar" style="background:#059669; color:white;">🚀</div>
+          <div class="msg-content">
+            <div class="msg-meta">
+              <span class="msg-author" style="color:#4ade80;">@sentinel-operator</span>
+              <span class="badge-bot">DISPATCHER</span>
+              <span class="msg-time">09:42:55 UTC</span>
+            </div>
+            <div class="msg-text">
+              Authorization verified by Ronit Gupta. Rolling back cluster to stable version <code style="color:#4ade80;">v2.13.2</code>...
+            </div>
+            
+            <div class="incident-card success">
+              <div class="card-title" style="color:#4ade80;">
+                <span>🩺</span> Synthetic Verification Probes Executed
+              </div>
+              <table class="probe-table">
+                <thead>
+                  <tr><th>Probe ID</th><th>Target Endpoint</th><th>Status</th><th>Latency</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>PRB-01</td><td>/api/v1/cart/session</td><td style="color:#4ade80;">HTTP 200 OK</td><td>18.2 ms</td></tr>
+                  <tr><td>PRB-02</td><td>/api/v1/checkout/calculate</td><td style="color:#4ade80;">HTTP 200 OK</td><td>22.4 ms</td></tr>
+                  <tr><td>PRB-03</td><td>/api/v1/checkout/payment</td><td style="color:#4ade80;">HTTP 200 OK</td><td>26.1 ms</td></tr>
+                  <tr><td>PRB-04</td><td>/api/v1/inventory/reserve</td><td style="color:#4ade80;">HTTP 200 OK</td><td>19.5 ms</td></tr>
+                </tbody>
+              </table>
+
+              <div style="margin-top:14px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
+                <div style="color:#4ade80; font-weight:700; font-size:13px; margin-bottom:4px;">
+                  🎉 INCIDENT RESOLVED — RECOVERY SUCCESSFUL
+                </div>
+                <div class="card-grid">
+                  <div><span class="grid-label">Cluster Version:</span> <span class="grid-val green">v2.13.2 (Active)</span></div>
+                  <div><span class="grid-label">HTTP 500 Error Rate:</span> <span class="grid-val green">0.0%</span></div>
+                  <div><span class="grid-label">Total Outage Duration:</span> <span class="grid-val" style="color:#fde047;">2 min 48 sec</span></div>
+                  <div><span class="grid-label">Post-Mortem Saved:</span> <span class="grid-val">docs/postmortems/INC-8924.md</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="typing-box" id="typingBox" style="visibility:hidden;">
+        <span id="typingText">Agent is typing</span>
+        <div class="typing-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="chat-input-bar">
+        <div class="input-inner">
+          <span id="inputDisplay">Message #incident-war-room...</span>
+          <span style="font-size:11px; color:#6b7280;">Press Enter ↵</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const msgContainer = document.getElementById('msgContainer');
+  const typingBox = document.getElementById('typingBox');
+  const typingText = document.getElementById('typingText');
+  const approveBtn = document.getElementById('approveBtn');
+  const inputDisplay = document.getElementById('inputDisplay');
+
+  function showTyping(text) {
+    typingText.textContent = text;
+    typingBox.style.visibility = 'visible';
+  }
+  function hideTyping() {
+    typingBox.style.visibility = 'hidden';
+  }
+
+  function revealMsg(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.add('visible');
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+  }
+
+  function startSimulation() {
+    // Hide all
+    for (let i = 0; i <= 6; i++) {
+      const el = document.getElementById(`msg${i}`);
+      if (el) el.classList.remove('visible');
+    }
+    approveBtn.classList.remove('clicked');
+    approveBtn.innerHTML = '<span>✓</span> APPROVE ROLLBACK';
+    hideTyping();
+    inputDisplay.textContent = 'Message #incident-war-room...';
+
+    // Step 0: Deploy message
+    setTimeout(() => {
+      revealMsg('msg0');
+    }, 400);
+
+    // Step 1: PagerDuty Alert
+    setTimeout(() => {
+      revealMsg('msg1');
+    }, 1800);
+
+    // Step 2: Ronit asks
+    setTimeout(() => {
+      revealMsg('msg2');
+    }, 3800);
+
+    // Step 3: Triager investigates
+    setTimeout(() => {
+      showTyping('@sentinel-triager is querying FastMCP telemetry & git commit SHAs...');
+    }, 4500);
+
+    setTimeout(() => {
+      hideTyping();
+      revealMsg('msg3');
+    }, 7000);
+
+    // Step 4: Remediator prepares approval card
+    setTimeout(() => {
+      showTyping('@sentinel-remediator is checking git diff and database schema compatibility...');
+    }, 7800);
+
+    setTimeout(() => {
+      hideTyping();
+      revealMsg('msg4');
+    }, 10500);
+
+    // Step 5: Auto-approve click
+    setTimeout(() => {
+      approveBtn.classList.add('clicked');
+      approveBtn.innerHTML = '<span>✓</span> APPROVED by Ronit Gupta (09:42:48 UTC)';
+      inputDisplay.textContent = 'APPROVE';
+    }, 13000);
+
+    setTimeout(() => {
+      revealMsg('msg5');
+      inputDisplay.textContent = 'Message #incident-war-room...';
+    }, 14200);
+
+    // Step 6: Operator rolls back and probes
+    setTimeout(() => {
+      showTyping('@sentinel-operator is executing zero-downtime rollback & probing endpoints...');
+    }, 14800);
+
+    setTimeout(() => {
+      hideTyping();
+      revealMsg('msg6');
+    }, 17500);
+  }
+
+  function userClicksApprove() {
+    approveBtn.classList.add('clicked');
+    approveBtn.innerHTML = '<span>✓</span> APPROVED by Ronit Gupta';
+    revealMsg('msg5');
+    showTyping('@sentinel-operator is executing deployment rollback...');
+    setTimeout(() => {
+      hideTyping();
+      revealMsg('msg6');
+    }, 2000);
+  }
+
+  // Start on load
+  window.addEventListener('load', () => {
+    startSimulation();
+  });
+</script>
+
+</body>
+</html>
