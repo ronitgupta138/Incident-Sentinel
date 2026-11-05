@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 capture_war_room_video.py - Captures each state of war_room_demo.html at 1920x1080
-and stitches it into an authentic, Slack/Discord-style 1080p demo video.
+with exact viewport scroll control so every single message, card, and button is
+clearly and prominently visible.
 """
 
 import os
@@ -17,12 +18,10 @@ HTML_PATH = "/home/ronit138/Incident-Sentinel/war_room_demo.html"
 
 os.makedirs(FRAMES_DIR, exist_ok=True)
 
-# Helper to modify JS in HTML to reveal specific messages deterministically
 with open(HTML_PATH, "r") as f:
     base_html = f.read()
 
-def render_state(idx: int, visible_count: int, is_approved: bool, typing_text: str, duration: int):
-    # Patch script to display up to visible_count messages immediately
+def render_state(idx: int, visible_count: int, is_approved: bool, typing_text: str, scroll_y: int, duration: int):
     patch_js = f"""
     <script>
       window.addEventListener('load', () => {{
@@ -46,7 +45,7 @@ def render_state(idx: int, visible_count: int, is_approved: bool, typing_text: s
           typingBox.style.visibility = 'hidden';
         }}
         const msgContainer = document.getElementById('msgContainer');
-        msgContainer.scrollTop = msgContainer.scrollHeight;
+        msgContainer.scrollTop = {scroll_y};
       }});
     </script>
     </body>
@@ -64,29 +63,30 @@ def render_state(idx: int, visible_count: int, is_approved: bool, typing_text: s
         BRAVE,
         "--headless",
         "--disable-gpu",
-        "--window-size=1600,1000",
+        "--window-size=1680,1050",
         f"--screenshot={png_path}",
         temp_html
     ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     
-    print(f"Captured State {idx} (duration: {duration}s)")
+    print(f"Captured State {idx} (scroll_y={scroll_y}, duration={duration}s)")
     return png_path, duration
 
+# (idx, visible_count, is_approved, typing_text, scroll_y, duration)
 states = [
-    (0, 0, False, "", 5),                                                                     # Deploy message
-    (1, 1, False, "", 6),                                                                     # PagerDuty Alert
-    (2, 2, False, "@sentinel-triager is querying FastMCP telemetry...", 5),                   # Ronit asks + Triager typing
-    (3, 3, False, "", 9),                                                                     # Triager Diagnosis Card
-    (4, 4, False, "", 8),                                                                     # Remediator Approval Card
-    (5, 5, True, "@sentinel-operator is executing deployment rollback...", 6),               # Ronit Approves
-    (6, 6, True, "", 10),                                                                     # Operator Rollback & Probes
+    (0, 0, False, "", 0, 5),                                                                     # Initial view: GitHub deploy bot (TOP ANCHORED)
+    (1, 1, False, "", 0, 6),                                                                     # PagerDuty Alert Ingestion (TOP ANCHORED)
+    (2, 2, False, "@sentinel-triager is querying FastMCP telemetry...", 0, 5),                   # Ronit asks + Triager typing (TOP ANCHORED)
+    (3, 3, False, "", 160, 9),                                                                   # Triager Diagnosis Card (Clean mid view)
+    (4, 4, False, "", 400, 8),                                                                   # Remediator Approval Card (Focused on button)
+    (5, 5, True, "@sentinel-operator is executing deployment rollback...", 600, 6),             # Ronit Approves (Focused on confirmation)
+    (6, 6, True, "", 950, 10),                                                                   # Operator Rollback & Probes & Recovery Card
 ]
 
 inputs_txt = os.path.join(FRAMES_DIR, "inputs.txt")
 last_png = None
 with open(inputs_txt, "w") as f:
-    for idx, count, approved, typing, dur in states:
-        png, d = render_state(idx, count, approved, typing, dur)
+    for idx, count, approved, typing, sy, dur in states:
+        png, d = render_state(idx, count, approved, typing, sy, dur)
         last_png = png
         f.write(f"file '{png}'\n")
         f.write(f"duration {dur}\n")
@@ -118,4 +118,4 @@ subprocess.run([
     OUTPUT_GIF
 ], check=True)
 
-print(f"\n✨ NEW SLACK/DISCORD DEMO VIDEO READY: {OUTPUT_VIDEO} ({os.path.getsize(OUTPUT_VIDEO)/(1024*1024):.2f} MB)")
+print(f"\n✨ NEW PERFECT-SCROLL DEMO VIDEO READY: {OUTPUT_VIDEO} ({os.path.getsize(OUTPUT_VIDEO)/(1024*1024):.2f} MB)")
