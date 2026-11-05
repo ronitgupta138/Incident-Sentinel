@@ -77,6 +77,15 @@ When a breaking deployment hits production, every minute of downtime costs thous
 
 ---
 
+## 🎬 Live Autonomous War Room Simulation
+
+<div align="center">
+  <img src="https://github.com/ronitgupta138/Incident-Sentinel/releases/download/v1.0.0/demo_preview.gif" alt="Incident-Sentinel Demo Simulation" width="100%">
+  <p><em>4-Phase Autonomous SRE Incident Triage, Human Approval Gate & Deployment Rollback on Switch</em></p>
+</div>
+
+---
+
 ## 🤖 Specialized AI Teammates
 
 ### 1. `@sentinel-triager` (Observability & Root Cause Isolation)
