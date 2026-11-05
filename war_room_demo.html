@@ -264,27 +264,28 @@
     gap: 8px;
     margin-bottom: 4px;
   }
-  .msg-author { font-size: 14px; font-weight: 700; color: #ffffff; }
-  .msg-time { font-size: 11px; color: #94a3b8; }
+  .msg-author { font-size: 15px; font-weight: 800; color: #ffffff; letter-spacing: -0.2px; }
+  .msg-time { font-size: 12px; color: #94a3b8; font-weight: 500; }
 
   .msg-text {
-    font-size: 14px;
-    line-height: 1.5;
-    color: #f1f5f9;
+    font-size: 15px;
+    line-height: 1.55;
+    color: #ffffff;
+    font-weight: 500;
   }
 
   /* Cards inside chat */
   .incident-card {
     background: #111b2f;
     border-radius: 10px;
-    padding: 16px 20px;
+    padding: 18px 24px;
     margin-top: 10px;
-    border: 1px solid #1e293b;
+    border: 1.5px solid #283753;
     border-left: 6px solid #38bdf8;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   }
   .incident-card.alert {
-    border-color: #451a1a;
+    border-color: #7f1d1d;
     border-left-color: #ef4444;
     background: #180d12;
   }
@@ -294,7 +295,7 @@
     background: #091a29;
   }
   .incident-card.approval {
-    border-color: #55330e;
+    border-color: #78350f;
     border-left-color: #f59e0b;
     background: #1c150c;
   }
@@ -305,22 +306,24 @@
   }
 
   .card-title {
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 8px;
+    font-size: 14.5px;
+    font-weight: 800;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    letter-spacing: -0.2px;
   }
   .card-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px 16px;
-    font-size: 12px;
+    gap: 10px 20px;
+    font-size: 13.5px;
   }
-  .grid-label { color: var(--text-secondary); }
-  .grid-val { font-weight: 600; color: var(--text-primary); font-family: monospace; }
+  .grid-label { color: #cbd5e1; font-weight: 500; }
+  .grid-val { font-weight: 700; color: #ffffff; font-family: "SFMono-Regular", Consolas, monospace; }
   .grid-val.red { color: #f87171; }
+  .grid-val.green { color: #4ade80; }
   .grid-val.green { color: #4ade80; }
 
   /* Approval Button */
@@ -854,7 +857,9 @@
     setTimeout(() => {
       hideTyping();
       revealMsg('msg6');
-      smoothScrollTo(950);
+      setTimeout(() => {
+        msgContainer.scrollTo({ top: msgContainer.scrollHeight, behavior: 'smooth' });
+      }, 300);
     }, 51000);
   }
 
